@@ -10,9 +10,9 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 
 -- ═══════════════════════════════════════════════════════════════
--- DYNAMIC SCAWSHUB LOADER
+-- DYNAMIC KOVARI LOADER
 -- ═══════════════════════════════════════════════════════════════
-local ScawsHub
+local Kovari
 do
     local function safeReadFile(path)
         if type(readfile) == "function" then
@@ -25,31 +25,31 @@ do
     end
 
     -- 1. Try local load for development
-    local localSrc = safeReadFile("ScawsLoader-main/ScawsLoader-main/main.luau")
+    local localSrc = safeReadFile("ScawsLoader-main/ScawsLoader-main/kovari_source")
     if localSrc then
         local fn = loadstring(localSrc)
         if fn then
             local ok, res = pcall(fn)
-            if ok then ScawsHub = res end
+            if ok then Kovari = res end
         end
     end
 
     -- 2. Fall back to raw GitHub URL for players
-    if not ScawsHub then
-        local url = "https://raw.githubusercontent.com/Peliy11/Nova-X/main/ScawsLoader-main/ScawsLoader-main/main.luau"
+    if not Kovari then
+        local url = "https://raw.githubusercontent.com/Peliy11/Nova-X/main/ScawsLoader-main/ScawsLoader-main/kovari_source"
         local ok, onlineSrc = pcall(game.HttpGet, game, url)
         if ok and type(onlineSrc) == "string" and #onlineSrc > 0 then
             local fn = loadstring(onlineSrc)
             if fn then
                 local ok2, res = pcall(fn)
-                if ok2 then ScawsHub = res end
+                if ok2 then Kovari = res end
             end
         end
     end
 end
 
-if not ScawsHub then
-    warn("[Nova X] Critical Error: Failed to load ScawsHub UI library.")
+if not Kovari then
+    warn("[Nova X] Critical Error: Failed to load Kovari UI library.")
     return nil
 end
 
@@ -284,7 +284,7 @@ local function sendWebhook()
 
     local embed = {
         title = "Nova X - Slime RNG Stat Update",
-        color = 16727614, -- Hex #FF3E3E
+        color = 6446310, -- Hex #625CE6
         fields = fields,
         footer = {
             text = "Nova X Slime RNG Script"
@@ -390,111 +390,111 @@ end)
 local SlimeRNG = {}
 
 function SlimeRNG.Load()
-    -- Create the window
-    local Window = ScawsHub:CreateWindow({
-        Name = "Nova X | Slime RNG",
-        ShowLoading = true,
-        LoadingDuration = 2
+    -- Initialize the window
+    local UI = Kovari:Init({
+        ToggleKey = Enum.KeyCode.RightControl,
+        Discord = "t28aPzKQrY"
     })
 
     -- 1. Main Tab
-    local MainTab = Window:CreateTab("Main")
-    MainTab:CreateSection("Auto Progression")
-    MainTab:CreateToggle({
+    local MainTab = UI:CreateTab("Main")
+    
+    local ProgressionSection = MainTab:AddSection("Auto Progression")
+    ProgressionSection:AddToggle({
         Name = "Auto Roll",
         Default = Settings.AutoRoll,
         Callback = function(v) Settings.AutoRoll = v end
     })
-    MainTab:CreateToggle({
+    ProgressionSection:AddToggle({
         Name = "Auto Equip Best",
         Default = Settings.AutoEquipBest,
         Callback = function(v) Settings.AutoEquipBest = v end
     })
-    MainTab:CreateToggle({
+    ProgressionSection:AddToggle({
         Name = "Auto Upgrade",
         Default = Settings.AutoUpgrade,
         Callback = function(v) Settings.AutoUpgrade = v end
     })
-    MainTab:CreateToggle({
+    ProgressionSection:AddToggle({
         Name = "Auto Buy Zones",
         Default = Settings.AutoBuyZones,
         Callback = function(v) Settings.AutoBuyZones = v end
     })
-    MainTab:CreateToggle({
+    ProgressionSection:AddToggle({
         Name = "Auto Rebirth",
         Default = Settings.AutoRebirth,
         Callback = function(v) Settings.AutoRebirth = v end
     })
-    MainTab:CreateDivider()
-    MainTab:CreateSection("Rewards & Collection")
-    MainTab:CreateToggle({
+
+    local CollectSection = MainTab:AddSection("Rewards & Collection")
+    CollectSection:AddToggle({
         Name = "Auto Collect Items",
         Default = Settings.AutoCollectItems,
         Callback = function(v) Settings.AutoCollectItems = v end
     })
-    MainTab:CreateToggle({
+    CollectSection:AddToggle({
         Name = "Auto Claim Index Rewards",
         Default = Settings.AutoCollectIndexRewards,
         Callback = function(v) Settings.AutoCollectIndexRewards = v end
     })
-    MainTab:CreateToggle({
+    CollectSection:AddToggle({
         Name = "Auto Claim Offline Rewards",
         Default = Settings.AutoCollectOfflineRewards,
         Callback = function(v) Settings.AutoCollectOfflineRewards = v end
     })
 
     -- 2. Items Tab
-    local ItemsTab = Window:CreateTab("Items")
-    ItemsTab:CreateSection("Boosters & Consumables")
-    ItemsTab:CreateToggle({
+    local ItemsTab = UI:CreateTab("Items")
+    local ConsumablesSection = ItemsTab:AddSection("Boosters & Consumables")
+    ConsumablesSection:AddToggle({
         Name = "Auto Use Boosts",
         Default = Settings.AutoUseBoosts,
         Callback = function(v) Settings.AutoUseBoosts = v end
     })
-    ItemsTab:CreateToggle({
+    ConsumablesSection:AddToggle({
         Name = "Auto Use Food",
         Default = Settings.AutoUseFood,
         Callback = function(v) Settings.AutoUseFood = v end
     })
-    ItemsTab:CreateToggle({
+    ConsumablesSection:AddToggle({
         Name = "Auto Use Packs",
         Default = Settings.AutoUsePacks,
         Callback = function(v) Settings.AutoUsePacks = v end
     })
 
     -- 3. Workshop Tab
-    local WorkshopTab = Window:CreateTab("Workshop")
-    WorkshopTab:CreateSection("Crafting & Workshop Helpers")
-    WorkshopTab:CreateToggle({
+    local WorkshopTab = UI:CreateTab("Workshop")
+    local CraftSection = WorkshopTab:AddSection("Crafting & Workshop Helpers")
+    CraftSection:AddToggle({
         Name = "Auto Unlock Recipe",
         Default = Settings.AutoUnlockRecipe,
         Callback = function(v) Settings.AutoUnlockRecipe = v end
     })
-    WorkshopTab:CreateToggle({
+    CraftSection:AddToggle({
         Name = "Auto Craft",
         Default = Settings.AutoCraft,
         Callback = function(v) Settings.AutoCraft = v end
     })
-    WorkshopTab:CreateToggle({
+    CraftSection:AddToggle({
         Name = "XP Transfer Helper",
         Default = Settings.XPTransfer,
         Callback = function(v) Settings.XPTransfer = v end
     })
 
     -- 4. Movement Tab
-    local MovementTab = Window:CreateTab("Movement")
-    MovementTab:CreateSection("Stat Modifiers")
-    MovementTab:CreateSlider({
+    local MovementTab = UI:CreateTab("Movement")
+    
+    local SpeedSection = MovementTab:AddSection("Stat Modifiers")
+    SpeedSection:AddSlider({
         Name = "WalkSpeed",
         Min = 16,
         Max = 500,
         Default = Settings.WalkSpeed,
-        Increment = 1,
         Callback = function(v) Settings.WalkSpeed = v end
     })
-    MovementTab:CreateDivider()
-    MovementTab:CreateSection("Flying Options")
-    MovementTab:CreateToggle({
+
+    local FlightSection = MovementTab:AddSection("Flying Options")
+    FlightSection:AddToggle({
         Name = "Fly Enabled",
         Default = Settings.Fly,
         Callback = function(v)
@@ -502,22 +502,21 @@ function SlimeRNG.Load()
             updateFlyState()
         end
     })
-    MovementTab:CreateSlider({
+    FlightSection:AddSlider({
         Name = "Fly Speed",
         Min = 10,
         Max = 500,
         Default = Settings.FlySpeed,
-        Increment = 1,
         Callback = function(v) Settings.FlySpeed = v end
     })
-    MovementTab:CreateDivider()
-    MovementTab:CreateSection("Other Utilities")
-    MovementTab:CreateToggle({
+
+    local UtilSection = MovementTab:AddSection("Other Utilities")
+    UtilSection:AddToggle({
         Name = "Noclip",
         Default = Settings.Noclip,
         Callback = function(v) Settings.Noclip = v end
     })
-    MovementTab:CreateToggle({
+    UtilSection:AddToggle({
         Name = "FPS Boost",
         Default = Settings.FPSBoost,
         Callback = function(v)
@@ -525,62 +524,62 @@ function SlimeRNG.Load()
             applyFPSBoost(v)
         end
     })
-    MovementTab:CreateToggle({
+    UtilSection:AddToggle({
         Name = "Auto Redeem Codes",
         Default = Settings.AutoRedeemCodes,
         Callback = function(v) Settings.AutoRedeemCodes = v end
     })
 
     -- 5. Webhook Tab
-    local WebhookTab = Window:CreateTab("Webhook")
-    WebhookTab:CreateSection("Settings")
-    WebhookTab:CreateToggle({
+    local WebhookTab = UI:CreateTab("Webhook")
+    
+    local WebSettingsSection = WebhookTab:AddSection("Settings")
+    WebSettingsSection:AddToggle({
         Name = "Enable Webhook",
         Default = Settings.WebhookEnabled,
         Callback = function(v) Settings.WebhookEnabled = v end
     })
-    WebhookTab:CreateInput({
+    WebSettingsSection:AddTextInput({
         Name = "Webhook URL",
         Placeholder = "Enter Discord Webhook URL...",
         Default = Settings.WebhookUrl,
         Callback = function(v) Settings.WebhookUrl = v end
     })
-    WebhookTab:CreateSlider({
+    WebSettingsSection:AddSlider({
         Name = "Send Interval (seconds)",
         Min = 10,
         Max = 600,
         Default = Settings.WebhookInterval,
-        Increment = 5,
         Callback = function(v) Settings.WebhookInterval = v end
     })
-    WebhookTab:CreateDivider()
-    WebhookTab:CreateSection("Notification Details")
-    WebhookTab:CreateToggle({
+
+    local WebDetailsSection = WebhookTab:AddSection("Notification Details")
+    WebDetailsSection:AddToggle({
         Name = "Show Player Name",
         Default = Settings.WebhookShowPlayerName,
         Callback = function(v) Settings.WebhookShowPlayerName = v end
     })
-    WebhookTab:CreateToggle({
+    WebDetailsSection:AddToggle({
         Name = "Show Coins",
         Default = Settings.WebhookShowCoins,
         Callback = function(v) Settings.WebhookShowCoins = v end
     })
-    WebhookTab:CreateToggle({
+    WebDetailsSection:AddToggle({
         Name = "Show Goop",
         Default = Settings.WebhookShowGoop,
         Callback = function(v) Settings.WebhookShowGoop = v end
     })
-    WebhookTab:CreateToggle({
+    WebDetailsSection:AddToggle({
         Name = "Show Session Time",
         Default = Settings.WebhookShowSessionTime,
         Callback = function(v) Settings.WebhookShowSessionTime = v end
     })
-    WebhookTab:CreateToggle({
+    WebDetailsSection:AddToggle({
         Name = "Show New Items & Slimes",
         Default = Settings.WebhookShowNewItems,
         Callback = function(v) Settings.WebhookShowNewItems = v end
     })
-    WebhookTab:CreateToggle({
+    WebDetailsSection:AddToggle({
         Name = "Include Timestamp",
         Default = Settings.WebhookTimestamp,
         Callback = function(v) Settings.WebhookTimestamp = v end
